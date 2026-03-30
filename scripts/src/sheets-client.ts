@@ -1,48 +1,34 @@
 /**
- * Google Sheets client using Replit connector OAuth token.
- * Do NOT cache the returned client — tokens expire.
+ * Google Sheets client using Google OAuth2 credentials stored as environment variables.
+ * Do NOT cache the returned client — tokens can expire.
+ *
+ * Required environment variables:
+ *   GOOGLE_CLIENT_ID      - from Google Cloud Console OAuth 2.0 credentials
+ *   GOOGLE_CLIENT_SECRET  - from Google Cloud Console OAuth 2.0 credentials
+ *   GOOGLE_REFRESH_TOKEN  - obtained from the one-time auth flow (run: pnpm email-to-sheets-auth)
  */
 
 import { google } from "googleapis";
 
-export async function getSheetsClient() {
-  const connectionId = process.env["SHEETS_CONNECTION_ID"];
-  if (!connectionId) {
+export function getSheetsClient() {
+  const clientId = process.env["GOOGLE_CLIENT_ID"];
+  const clientSecret = process.env["GOOGLE_CLIENT_SECRET"];
+  const refreshToken = process.env["GOOGLE_REFRESH_TOKEN"];
+
+  if (!clientId || !clientSecret || !refreshToken) {
     throw new Error(
-      "SHEETS_CONNECTION_ID environment variable is not set.\n" +
-        "Set it to your Replit Google Sheets connector connection ID."
+      "Missing Google OAuth credentials.\n" +
+        "Set these environment variables as Replit Secrets:\n" +
+        "  GOOGLE_CLIENT_ID\n" +
+        "  GOOGLE_CLIENT_SECRET\n" +
+        "  GOOGLE_REFRESH_TOKEN\n\n" +
+        "To get a refresh token, run:\n" +
+        "  pnpm --filter @workspace/scripts run email-to-sheets-auth"
     );
   }
 
-  const hostname = process.env["REPLIT_CONNECTORS_HOSTNAME"];
-  const replIdentity = process.env["REPL_IDENTITY"];
-  const webRenewal = process.env["WEB_REPL_RENEWAL"];
-
-  if (!hostname || !replIdentity) {
-    throw new Error(
-      "Replit connector environment variables are missing.\n" +
-        "Make sure REPLIT_CONNECTORS_HOSTNAME and REPL_IDENTITY are set."
-    );
-  }
-
-  const tokenUrl = `https://${hostname}/v1/connections/${connectionId}/token`;
-  const headers: Record<string, string> = {
-    "X-Replit-Identity": replIdentity,
-  };
-  if (webRenewal) {
-    headers["X-Replit-Web-Renewal"] = webRenewal;
-  }
-
-  const res = await fetch(tokenUrl, { headers });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Failed to get Google Sheets token: ${res.status} ${body}`);
-  }
-
-  const { access_token } = (await res.json()) as { access_token: string };
-
-  const auth = new google.auth.OAuth2();
-  auth.setCredentials({ access_token });
+  const auth = new google.auth.OAuth2(clientId, clientSecret, "urn:ietf:wg:oauth:2.0:oob");
+  auth.setCredentials({ refresh_token: refreshToken });
 
   return google.sheets({ version: "v4", auth });
 }

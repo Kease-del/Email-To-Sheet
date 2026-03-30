@@ -6,6 +6,7 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "email-to-sheets": "tsx ./src/email-to-sheets.ts",
+    "email-to-sheets-auth": "tsx ./src/email-to-sheets-auth.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

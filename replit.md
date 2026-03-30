@@ -94,3 +94,17 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+
+#### `email-to-sheets` script
+
+Reads Gmail inbox and writes Subject, Sender, Date, Body Snippet to a Google Sheet.
+
+**Note:** The user dismissed the Replit Gmail and Google Sheets OAuth integrations. The script is built but needs Google OAuth credentials provided manually as secrets:
+- `GOOGLE_CLIENT_ID` — from Google Cloud Console OAuth 2.0 credentials
+- `GOOGLE_CLIENT_SECRET` — from Google Cloud Console OAuth 2.0 credentials
+- `GOOGLE_REFRESH_TOKEN` — obtained after running the one-time auth flow
+- `SPREADSHEET_ID` — from the Google Sheet URL
+
+**Do not try to use the Replit connector integration system for Gmail/Sheets on this project** — the user has opted to use their own credentials instead. Use the manual OAuth flow in `scripts/src/email-to-sheets.ts`.
+
+Run: `pnpm --filter @workspace/scripts run email-to-sheets`
