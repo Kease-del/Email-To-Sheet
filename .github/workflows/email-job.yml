@@ -1,9 +1,9 @@
 name: Email Automation Job
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "*/5 * * * *"
-  workflow_dispatch:
 
 jobs:
   run-script:
@@ -18,14 +18,21 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - name: Enable Corepack (pnpm)
+        run: corepack enable
+
+      - name: Install dependencies (pnpm)
+        run: |
+          cd scripts
+          pnpm install
 
       - name: Install tsx
-        run: npm install -g tsx
+        run: pnpm add -g tsx
 
       - name: Run script
-        run: npx tsx ./scripts/src/email-to-sheets.ts
+        run: |
+          cd scripts
+          pnpm exec tsx src/email-to-sheets.ts
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
