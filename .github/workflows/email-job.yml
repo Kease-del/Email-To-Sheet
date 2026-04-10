@@ -26,9 +26,6 @@ jobs:
           cd scripts
           pnpm install
 
-      - name: Install tsx
-        run: pnpm add -g tsx
-
       - name: Run script
         run: |
           cd scripts
